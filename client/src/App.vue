@@ -1,17 +1,11 @@
 <template>
   <div id="app">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-      <el-menu-item index="1">首页</el-menu-item>
-      <el-menu-item index="2">文章</el-menu-item>
-      <el-menu-item index="3">关于</el-menu-item>
-    </el-menu>
+    
     <!-- 使用 v-if 控制组件显示
     <Login v-if="isLogin" @login-success="handleLoginSuccess" />
     <UserInfo v-if="isInfo" @logout="handleLogout" />
     -->
-    <div>
-      <el-button type="primary">这是 Element Plus 按钮</el-button>
-    </div>
+    
     <router-view></router-view>
   </div>
 </template>

@@ -66,7 +66,7 @@ app.get('/auth/github', passport.authenticate('github', {//授权登录界面
 app.get('/auth/github/callback', 
     passport.authenticate('github', { failureRedirect: '/login' }),
     (req, res) => {
-        res.redirect('http://localhost:8080/'); //重新定向到前端首页
+        res.redirect('http://localhost:8080/home'); //重新定向到前端首页
     }
 );
 

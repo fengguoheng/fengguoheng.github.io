@@ -6,10 +6,16 @@ const { DataTypes } = require('sequelize');
 const mongoose = require('./mongodb.js');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
+const mysql = require('mysql2/promise');
 //const fs = require('fs');
 //const path = require('path');
 
-
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '2794840873',
+    database: 'blogdb'
+});
 const UserSchema = new mongoose.Schema({
     username: String,
     password: String
@@ -23,7 +29,13 @@ const SqlUser = sequelize.define('SqlUser', {
     },
     password: {
         type: DataTypes.STRING
+    },
+    email: {
+        type: DataTypes.STRING,
+        unique: true, // 确保邮箱地址唯一
+        allowNull: false // 不允许为空
     }
+
 });
 
 // 同步 SQL 数据库模型（仅在开发时使用，生产环境需谨慎）
@@ -48,11 +60,11 @@ router.post('/sqlLogin', async (req, res) => {
             // 生成 JWT
             const token = jwt.sign({ userId: user.id }, 'your_secret_key', { expiresIn: '1h' });
             req.session.user = { username: req.body.username, loggedIn: true };
-            console.log(req.session.user,2);
-            console.log(req.session,1);
-            console.log(req.session.user.loggedIn,3);
+
+
+
             const a = req.session.user;
-            res.json({ success: true, message: 'SQL 数据库登录成功', token, a});
+            res.json({ success: true, message: 'SQL 数据库登录成功', token, a, email: user.email });
         } else {
             res.json({ success: false, message: 'SQL 数据库用户名或密码错误' });
         }
@@ -120,6 +132,120 @@ router.get('/protecteds', (req, res) => {
         res.status(401).json({ message: '未登录' });
     }
 });
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+router.post('/register', async (req, res) => {
+    const { username, password, email } = req.body;
+
+    // 基本验证：检查字段是否为空
+    if (!username || !password || !email) {
+        return res.status(400).json({ success: false, message: '请填写完整信息' });
+    }
+
+    // 验证邮箱格式
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ success: false, message: '请输入有效的邮箱地址' });
+    }
+
+    try {
+        // 检查用户名是否已存在
+        const existingUser = await SqlUser.findOne({ where: { username } });
+        console.log(existingUser);
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: '该用户名已被使用，请选择其他用户名' });
+        }
+
+        const existingEmailUser = await SqlUser.findOne({ where: { email } });
+        console.log(existingEmailUser);
+        if (existingEmailUser) {
+            return res.status(400).json({ success: false, message: '该邮箱已被注册，请使用其他邮箱' });
+        }
+        await SqlUser.create({ username, password, email });
+        // 将用户信息插入数据库
+
+
+        res.json({ success: true, message: '注册成功' });
+    } catch (error) {
+        console.error('注册过程中出现数据库错误:', error);
+        res.status(500).json({ success: false, message: '注册失败，请稍后重试' });
+    }
+});
+router.get('/getBlogs', async (req, res) => {
+    try {
+        // 从数据库中查询所有记录
+        const [rows] = await pool.execute('SELECT blogs FROM sqlusers');
+        console.log(1,rows);
+        let allBlogs = [];
+
+        // 遍历查询结果
+        rows.forEach(row => {
+            console.log(2,row);//row是对象
+            console.log(row.blogs, 3);//是数组
+            console.log(Array.isArray(row.blogs))
+            const blogsArray = row.blogs;//说右边不是
+
+
+            if (Array.isArray(blogsArray)) {
+                allBlogs = allBlogs.concat(blogsArray);
+            }
+        });
+
+        // 根据日期对博客进行排序
+        allBlogs.sort((a, b) => {
+            return new Date(b.date) - new Date(a.date);
+        });
+
+        res.json(allBlogs);
+    } catch (error) {
+        console.error('查询数据库出错:', error);
+        res.status(500).json({ error: '服务器内部错误' });
+    }
+});
+// 处理获取用户博客的接口
+router.get('/personBlogs/:email',async (req, res) => {
+    const [rows] = await pool.execute('SELECT blogs FROM sqlUsers WHERE email = ?', [req.params.email]);
+    console.log(4,rows);//rows是数组
+    console.log(5,typeof(rows[0].blogs));//是二维数组
+    console.log(6,rows[0].blogs);//但是但是但是打印出来是[{},{}]
+    let a=[];
+    a=rows[0].blogs.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);//.字体是根据对象的字段
+    });
+
+    res.json({ a });
+    /*
+    const userEmail = req.params.email; // 从路由参数获取 email
+
+
+
+    pool.query('SELECT blogs FROM sqlUsers WHERE email = ?', [userEmail], (err, results) => {
+        if (err) {
+            console.error('执行查询出错:', err);
+            return res.status(500).json({ error: '服务器内部错误' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: '用户不存在' });
+        }
+
+        try {
+            const blogsData = results[0].blogs;
+            console.error(Array.isArray(blogsData));
+            //blogsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            res.json(blogsData); // 返回博客数据
+
+
+        } catch (parseErr) {
+            console.error('解析博客数据出错:', parseErr);
+            res.status(500).json({ error: '博客数据格式异常' });
+        }
+    });
+});
+*/
+});
+
 
 module.exports = router;
 /*

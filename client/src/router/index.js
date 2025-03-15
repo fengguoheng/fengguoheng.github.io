@@ -10,8 +10,8 @@ const Dashboard = () => import('../views/Dashboard.vue');
 const routes = [
     {
         path: '/',
-        name: 'Home',
-        component: Home,
+        name: 'Login',
+        component: Login,
         // 路由独享守卫
         beforeEnter: (to, from, next) => {
             console.log(`进入Home的路由独享守卫:即将从 ${from.path} 导航到 ${to.path}`);
@@ -20,9 +20,9 @@ const routes = [
         }
     },
     {
-        path: '/login',
-        name: 'Login',//访问时才导入
-        component: Login//components:() => import('../components/UserLogin.vue');
+        path: '/home',
+        name: 'home',//访问时才导入
+        component: Home,//components:() => import('../components/UserLogin.vue');
     },
     {
         path: '/user',
@@ -46,6 +46,16 @@ const routes = [
         path: '/user/:id', // 动态路由
         name: 'UserDetail',
         component: () => import('../views/UserDetail.vue')
+    }
+    ,{
+        path: '/register', // 动态路由
+        name: 'register',
+        component: () => import('../components/UserRegister.vue') 
+    },
+    {
+        path: '/person', // 动态路由
+        name: 'person',
+        component: () => import('../views/个人主页.vue') 
     }
 ];
 

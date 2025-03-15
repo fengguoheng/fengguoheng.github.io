@@ -9,6 +9,7 @@
         <button @click="ttt">尝试token</button>
         <button @click="accessProtected">尝试session</button>
         <button id="githubLoginBtn">使用 GitHub 登录</button>
+        <button @click="toRegister">现在去注册</button>
         <p>{{ loginStore.message }}</p>
     </div>
 </template>
@@ -23,8 +24,12 @@ const isLoggedIn = ref(false);
 
 const handleSqlLogin = async () => {
     const isSuccess = await loginStore.sqlLogin();
+
+    
     if (isSuccess) {
         emits('login-success');
+        console.log('localstorage',localStorage.getItem('email'));
+        window.location.href = '/home';
     }
 };
 
@@ -48,7 +53,7 @@ const message = ref('');
 
 const fetchLogin = async () => {
     try {
-        console.log(1, localStorage.getItem('token'));
+
         // 使用 instance 发送请求，自动携带拦截器处理的请求头
         const response = await instance.post('/api/sqlLogin', {
             username: loginStore.form.username,
@@ -56,11 +61,12 @@ const fetchLogin = async () => {
         });
         if (response.message === 'SQL 数据库登录成功') {
             loginStore.message = response.message;
-            console.log(333);
+
             localStorage.setItem('token', response.token);
-            console.log('token是11122222', response.token);
-            console.log(localStorage.getItem('token'));
+
+
             isLoggedIn.value = true;
+            window.location.href = '/home';
         } else {
             loginStore.message = response.message;
         }
@@ -128,6 +134,9 @@ onMounted(() => {
         });
     }
 });
+const toRegister = () => {
+    window.location.href = '/register'; // 跳转到注册页面 
+}
 
 
 

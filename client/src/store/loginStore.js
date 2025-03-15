@@ -5,10 +5,12 @@ export const useLoginStore = defineStore('login', {
     state: () => ({
         form: {
             username: '',
-            password: ''
+            password: '',
+            
         },
         message: '',
-        loginError: false
+        loginError: false,
+        email:'',
     }),
     actions: {
         async sqlLogin() {
@@ -17,9 +19,13 @@ export const useLoginStore = defineStore('login', {
                     username: this.form.username,
                     password: this.form.password
                 });
-                if (response.data.message === '登录成功') {
+                if (response.data.message === 'SQL 数据库登录成功') {
                     this.loginError = false;
                     this.message = response.data.message;
+                    this.email = response.data.email;
+                    console.log(this.email,3,555555555);
+                    localStorage.setItem('email', this.email);
+                    console.log(localStorage.getItem('email'),4,6666666666);
                     return true; // 表示登录成功
                 } else {
                     this.loginError = true;
