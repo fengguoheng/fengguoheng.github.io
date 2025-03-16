@@ -16,7 +16,14 @@
             <el-card v-for="blog in extractedData" class="blog-card">
                 <template #header>
                     <h3>{{ blog.title }}</h3>
-                    <span class="blog-date">{{ blog.date }}</span>
+                    <span class="blog-date">{{ new Date(blog.date).toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                        }) }}</span>
                 </template>
                 <div class="blog-content">
                     {{ blog.content }}
@@ -41,6 +48,9 @@ const extractedData = ref([]);
 
 const handleSelect = (index) => {
     console.log('当前选中：', index);
+    if(index === 'home'){
+        window.location.href = '/home';
+    }
     if (index === 'exit') {
         // 可在此处添加退出登录等逻辑
     }

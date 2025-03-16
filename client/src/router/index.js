@@ -56,6 +56,11 @@ const routes = [
         path: '/person', // 动态路由
         name: 'person',
         component: () => import('../views/个人主页.vue') 
+    },
+    {
+        path:'/write',
+        name:'write',
+        component:()=>import('../views/撰写文章.vue')
     }
 ];
 

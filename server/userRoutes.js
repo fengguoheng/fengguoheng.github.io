@@ -176,12 +176,12 @@ router.get('/getBlogs', async (req, res) => {
     try {
         // 从数据库中查询所有记录
         const [rows] = await pool.execute('SELECT blogs FROM sqlusers');
-        console.log(1,rows);
+        console.log(1, rows);
         let allBlogs = [];
 
         // 遍历查询结果
         rows.forEach(row => {
-            console.log(2,row);//row是对象
+            console.log(2, row);//row是对象
             console.log(row.blogs, 3);//是数组
             console.log(Array.isArray(row.blogs))
             const blogsArray = row.blogs;//说右边不是
@@ -204,13 +204,13 @@ router.get('/getBlogs', async (req, res) => {
     }
 });
 // 处理获取用户博客的接口
-router.get('/personBlogs/:email',async (req, res) => {
+router.get('/personBlogs/:email', async (req, res) => {
     const [rows] = await pool.execute('SELECT blogs FROM sqlUsers WHERE email = ?', [req.params.email]);
-    console.log(4,rows);//rows是数组
-    console.log(5,typeof(rows[0].blogs));//是二维数组
-    console.log(6,rows[0].blogs);//但是但是但是打印出来是[{},{}]
-    let a=[];
-    a=rows[0].blogs.sort((a, b) => {
+    console.log(4, rows);//rows是数组
+    console.log(5, typeof (rows[0].blogs));//是二维数组
+    console.log(6, rows[0].blogs);//但是但是但是打印出来是[{},{}]
+    let a = [];
+    a = rows[0].blogs.sort((a, b) => {
         return new Date(b.date) - new Date(a.date);//.字体是根据对象的字段
     });
 
@@ -245,7 +245,81 @@ router.get('/personBlogs/:email',async (req, res) => {
 });
 */
 });
+router.post('/submitBlogs/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        console.log(email);
+        const { title, content } = req.body;
+        const newArticle = {
+            title,
+            content,
+            date: new Date() // 将日期转换为 ISO 字符串格式
+        };
+        let a = JSON.stringify(newArticle);
+        let b = [JSON.stringify(a)];
+        console.log(111111, b);
+        let c = b;
+        //let c = b.map(item => {
+        // 去掉字符串首尾的引号
+        //return item.slice(1, -1); 
+        //});
+        console.log('c', c);
+        let d = c.map(item => item.replace(/\\/g, ''));
+        console.log('d', d);
+        const originalArray = d;
 
+        // 处理数组元素，去除多余引号和转义字符
+        const processedArray = originalArray.map(item => {
+            // 去掉首尾引号
+            item = item.trim().slice(1, -1);
+            // 去掉转义字符
+            return item.replace(/\\/g, '');
+        });
+
+        // 把处理后的元素拼接成 JSON 数组字符串
+        const jsonArrayString = `[ ${processedArray.join(', ')} ]`;
+
+        // 在字符串外面加上单引号
+        const finalString = `'${jsonArrayString}'`;
+        console.log(finalString);
+        const newString = `${finalString.trim().replace(/\s*(\[|\])\s*/g, '$1')}`;
+        console.log('最后', newString);
+        const e = newString.slice(1, -1);
+        console.log('e', e);
+
+        try {
+            
+            
+
+            const [rows] = await pool.execute(
+                'UPDATE sqlUsers SET blogs = JSON_MERGE_PRESERVE(blogs, ?) WHERE email = ?',
+                [e, email]
+            );
+
+            // 检查是否更新成功
+            if (rows.affectedRows === 0) {
+                throw new Error('未找到对应的用户或更新失败');
+            }
+
+           
+           
+
+            // 返回成功响应
+            res.status(200).json({ message: '文章提交成功', article: newArticle });
+        } catch (error) {
+            
+            
+            console.error('数据库操作出错:', error);
+            res.status(500).json({ message: '文章提交失败，请稍后重试' });
+        } finally {
+            
+            
+        }
+    } catch (error) {
+        console.error('请求处理出错:', error);
+        res.status(500).json({ message: '服务器内部错误，请稍后重试' });
+    }
+});
 
 module.exports = router;
 /*

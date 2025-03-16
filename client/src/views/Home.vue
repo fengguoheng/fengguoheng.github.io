@@ -16,14 +16,29 @@
             <el-card v-for="blog in sortedBlogs" :key="blog.id" class="blog-card">
                 <template #header>
                     <h3>{{ blog.title }}</h3>
-                    <span class="blog-date">{{ blog.date }}</span>
+                    <span class="blog-date">{{ new Date(blog.date).toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    }) }}</span>
                 </template>
                 <div class="blog-content">
                     {{ blog.content }}
                 </div>
             </el-card>
         </div>
+        <button @click='toWrite' id="writeArticleBtn">撰写文章</button>
     </div>
+    <!-- 隐藏的音频容器 -->
+    <audio id="musicPlayer" src="船长.mp3" controls style="display: none;"></audio>
+
+    <!-- 播放音乐按钮 -->
+    <button ref="musicBtnRef"  class="music-btn" @click="playMusic()">播放音乐</button>
+
+
 </template>
 
 
@@ -43,6 +58,7 @@ const handleSelect = (index) => {
 
 const blogs = ref([]);
 const sortedBlogs = ref([]);
+const musicBtnRef = ref(null);
 
 const fetchBlogs = async () => {
     try {
@@ -56,9 +72,22 @@ const fetchBlogs = async () => {
 const toPerson = () => {
     router.push('/person'); // 使用 router.push 进行路由跳转
 };
+const toWrite = () => {
+    router.push('/write'); // 使用 router.push 进行路由跳转 
+}
+const playMusic = () => {
+    const musicPlayer = document.getElementById('musicPlayer');
+    if (musicPlayer.paused) {
+        musicPlayer.play();
+        musicBtnRef.value.textContent = "暂停音乐"; // 切换为暂停文字
+    } else {
+        musicPlayer.pause();
+        musicBtnRef.value.textContent = "播放音乐"; // 切换回播放文字
+    }
+};
 
 onMounted(() => {
-    console.log('localstorage',localStorage.getItem('email'));
+    console.log('localstorage', localStorage.getItem('email'));
     fetchBlogs();
 });
 </script>
@@ -115,5 +144,41 @@ onMounted(() => {
 
 .blog-content {
     margin-top: 10px;
+}
+
+#writeArticleBtn {
+    position: fixed;
+    /* 固定定位 */
+    bottom: 30px;
+    /* 距离底部30px */
+    right: 30px;
+    /* 距离右侧30px */
+    padding: 12px 24px;
+    background-color: #409eff;
+    /* 按钮颜色 */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 999;
+    /* 确保按钮在顶层 */
+}
+
+/* 固定按钮样式 */
+.music-btn {
+    position: fixed;
+    top: 20px;
+    /* 距离顶部20px */
+    right: 20px;
+    /* 距离右侧20px */
+    padding: 10px 20px;
+    background-color: #42b983;
+    /* 按钮颜色 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 999;
+    /* 确保按钮在顶层 */
 }
 </style>
