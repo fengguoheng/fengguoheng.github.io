@@ -121,5 +121,5 @@ app.use(express.static(path.join(__dirname,'public')));
 
 const port = 3000;
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
+    console.log(`Server running at http://192.168.110.199:${port}/`);
 });//等待访客到来

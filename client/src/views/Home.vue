@@ -62,7 +62,7 @@ const musicBtnRef = ref(null);
 
 const fetchBlogs = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/api/getBlogs');
+        const response = await axios.get('http://192.168.110.199:3000/api/getBlogs');
         blogs.value = response.data;
         sortedBlogs.value = blogs.value;
     } catch (error) {

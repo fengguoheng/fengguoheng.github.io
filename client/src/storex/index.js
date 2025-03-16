@@ -29,7 +29,7 @@ const store = createStore({
     actions: {
         async sqlLogin({ commit, state }) {
             try {
-                const response = await axios.post('http://localhost:3000/api/sqlLogin', {
+                const response = await axios.post('http://192.168.110.199:3000/api/sqlLogin', {
                     username: state.form.username,
                     password: state.form.password
                 });
@@ -47,7 +47,7 @@ const store = createStore({
         },
         async mongoLogin({ commit, state }) {
             try {
-                const response = await axios.post('http://localhost:3000/api/mongoLogin', {
+                const response = await axios.post('http://192.168.110.199:3000/api/mongoLogin', {
                     username: state.form.username,
                     password: state.form.password
                 });

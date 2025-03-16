@@ -9,6 +9,14 @@ module.exports = defineConfig({
                 __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false)
             })
         ]
+    },
+    devServer: {
+        proxy: {
+            '/api': {
+                target: 'http://192.168.100.19:3000', // 后端实际地址
+                changeOrigin: true
+            }
+        }
     }
-    
+
 });

@@ -84,7 +84,7 @@ const ttt = async () => {
             return;
         }
 
-        const response = await fetch('http://localhost:3000/api/protected', {
+        const response = await fetch('http://192.168.110.199:3000/api/protected', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -106,7 +106,7 @@ const ttt = async () => {
 };
 const accessProtected = async () => {//session功能失败
     try {
-        const response = await fetch('http://localhost:3000/api/protecteds', {
+        const response = await fetch('http://192.168.110.199:3000/api/protecteds', {
             method: 'GET',
 
             headers: {
@@ -130,7 +130,7 @@ onMounted(() => {
     if (githubLoginBtn) { // 增加存在性校验
         githubLoginBtn.addEventListener('click', () => {
             //跳转到你后端服务的 /auth/github 路由
-            window.location.href = 'http://localhost:3000/auth/github';
+            window.location.href = 'http://192.168.137.1:3000/auth/github';
         });
     }
 });

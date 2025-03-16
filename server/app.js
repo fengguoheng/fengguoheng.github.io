@@ -25,7 +25,12 @@ const OAuth = require('oauth'); // 引入 oauth 模块，用于修改请求端�
 })();
 
 // 中间件设置
-app.use(cors({}));  
+app.use(cors({
+    origin:'*',
+    credentials: true, // 允许发送凭据（如cookies）
+    methods: 'GET,POST,PUT,DELETE,OPTIONS', // 允许的HTTP方法
+    
+}));  
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(bodyParser.json());
@@ -62,13 +67,17 @@ app.get('/auth/github', passport.authenticate('github', {//授权登录界面
 }));//第二个参数是中间件
 //处理 GitHub 认证回调的路由。当 GitHub 认证流程完成后，会向这个路由发送回调请求。
 //当接收到回调请求时，会先执行第二个参数passport.authenticate('github', { failureRedirect: '/login' })这个中间件。它会对 GitHub 返回的认证信息进行验证和处理，如果认证失败，就会重定向到/login页面。
-//如果认证成功，才会执行第三个参数，即回调函数(req, res) => { res.redirect('http://localhost:8080/'); }，将用户重定向到http://localhost:8080/页面。
+//如果认证成功，才会执行第三个参数，即回调函数(req, res) => { res.redirect('http://192.168.110.199:8080/'); }，将用户重定向到http://192.168.110.199:8080/页面。
 app.get('/auth/github/callback', 
     passport.authenticate('github', { failureRedirect: '/login' }),
     (req, res) => {
-        res.redirect('http://localhost:8080/home'); //重新定向到前端首页
+        res.redirect('http://192.168.110.199:8080/home'); //重新定向到前端首页
     }
 );
+app.get('/', (req, res) => {
+    res.redirect('http://192.168.110.199:8080/'); //重新定向到前端首页
+    
+})
 
 app.use('/api', userRoutes);
 
@@ -84,7 +93,7 @@ passport.use(new GitHubStrategy({
     oauth2: kkgithubOAuth2, // 自定义 OAuth2 实例
     clientID: 'Ov23liqyjvZ8blf0Nqmr', // 明确保留 clientID
     clientSecret: '2ac73990a8e357d52370c8c8b0d12a13b1f185be', // 明确保留 clientSecret
-    callbackURL: 'http://localhost:3000/auth/github/callback'//回调地址
+    callbackURL: 'http://192.168.110.199:3000/auth/github/callback'//回调地址
 }, (accessToken, refreshToken, profile, done) => {//待丰富
     // 处理 GitHub 用户信息，例如保存到数据库或返回给前端
     done(null, profile);
@@ -96,5 +105,5 @@ passport.deserializeUser((user, done) => done(null, user));
 
 const port = 3000;
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
+    console.log(`Server running at http://192.168.110.199:${port}/`);
 });

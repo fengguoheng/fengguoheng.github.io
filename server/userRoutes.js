@@ -11,7 +11,7 @@ const mysql = require('mysql2/promise');
 //const path = require('path');
 
 const pool = mysql.createPool({
-    host: 'localhost',
+    host: '192.168.110.199',
     user: 'root',
     password: '2794840873',
     database: 'blogdb'
@@ -206,10 +206,14 @@ router.get('/getBlogs', async (req, res) => {
 // 处理获取用户博客的接口
 router.get('/personBlogs/:email', async (req, res) => {
     const [rows] = await pool.execute('SELECT blogs FROM sqlUsers WHERE email = ?', [req.params.email]);
+    console.log(1, req.params.email);
     console.log(4, rows);//rows是数组
     console.log(5, typeof (rows[0].blogs));//是二维数组
     console.log(6, rows[0].blogs);//但是但是但是打印出来是[{},{}]
     let a = [];
+    if (!rows[0].blogs) {
+        return res.json({ a });
+    }
     a = rows[0].blogs.sort((a, b) => {
         return new Date(b.date) - new Date(a.date);//.字体是根据对象的字段
     });
@@ -287,41 +291,41 @@ router.post('/submitBlogs/:email', async (req, res) => {
         const e = newString.slice(1, -1);
         console.log('e', e);
 
-        try {
-            
-            
 
-            const [rows] = await pool.execute(
-                'UPDATE sqlUsers SET blogs = JSON_MERGE_PRESERVE(blogs, ?) WHERE email = ?',
-                [e, email]
-            );
 
-            // 检查是否更新成功
-            if (rows.affectedRows === 0) {
-                throw new Error('未找到对应的用户或更新失败');
-            }
 
-           
-           
+        const [rows] = await pool.execute(
+            `UPDATE sqlUsers
+        SET blogs = IF(
+            blogs IS NULL,
+            ?,
+            JSON_MERGE_PRESERVE(blogs, ?)
+        )
+        WHERE email = ?`,
+            [e, e, email]
+        );
+        console.log(33333333333, rows);
 
-            // 返回成功响应
-            res.status(200).json({ message: '文章提交成功', article: newArticle });
-        } catch (error) {
-            
-            
-            console.error('数据库操作出错:', error);
-            res.status(500).json({ message: '文章提交失败，请稍后重试' });
-        } finally {
-            
-            
+
+        // 检查是否更新成功
+        if (rows.affectedRows === 0) {
+            throw new Error('未找到对应的用户或更新失败');
         }
-    } catch (error) {
-        console.error('请求处理出错:', error);
-        res.status(500).json({ message: '服务器内部错误，请稍后重试' });
-    }
-});
 
-module.exports = router;
+
+
+
+        // 返回成功响应
+        res.status(200).json({ message: '文章提交成功', article: newArticle });
+    } catch (error) {
+
+
+        console.error('数据库操作出错:', error);
+        res.status(500).json({ message: '文章提交失败，请稍后重试' });
+    }
+}),
+
+    module.exports = router;
 /*
 // 创建事件发射器实例
 const loginEmitter = new EventEmitter();

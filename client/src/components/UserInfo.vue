@@ -41,7 +41,7 @@ onUnmounted(() => {
 
 const getSqlUserInfo = async () => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/sqlUsers/${username.value}`);
+        const response = await axios.get(`http://192.168.110.199:3000/api/sqlUsers/${username.value}`);
         userInfo.value = response.data;
         // 假设返回的数据是数组，用于 v-for 渲染
         console.log(response.data);
@@ -66,7 +66,7 @@ const getSqlUserInfo = async () => {
 
 const getMongoUserInfo = async () => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/mongoUsers/${username.value}`);
+        const response = await axios.get(`http://192.168.110.199:3000/api/mongoUsers/${username.value}`);
         userInfo.value = response.data;
         // 假设返回的数据是数组，用于 v-for 渲染
         userInfoArray.value = response.data;

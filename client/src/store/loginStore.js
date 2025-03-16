@@ -15,7 +15,7 @@ export const useLoginStore = defineStore('login', {
     actions: {
         async sqlLogin() {
             try {
-                const response = await axios.post('http://localhost:3000/api/sqlLogin', {
+                const response = await axios.post('http://192.168.137.1:3000/api/sqlLogin', {
                     username: this.form.username,
                     password: this.form.password
                 });
@@ -39,7 +39,7 @@ export const useLoginStore = defineStore('login', {
         },
         async mongoLogin() {
             try {
-                const response = await axios.post('http://localhost:3000/api/mongoLogin', {
+                const response = await axios.post('http://192.168.110.199:3000/api/mongoLogin', {
                     username: this.form.username,
                     password: this.form.password
                 });

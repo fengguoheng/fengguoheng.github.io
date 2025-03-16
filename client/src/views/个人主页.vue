@@ -60,7 +60,7 @@ const fetchUserBlogs = async () => {
 
         // 使用 loginStore.email 传递给后端
 
-        const response = await axios.get(`http://localhost:3000/api/personBlogs/${email.value}`);
+        const response = await axios.get(`http://192.168.110.199:3000/api/personBlogs/${email.value}`);
         sortedBlogs.value = response.data.a;
         console.log(sortedBlogs.value);
         // ✅ 将处理后的数据赋值给响应式变量

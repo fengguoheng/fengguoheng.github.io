@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 
 // 创建 Sequelize 实例，配置数据库连接池
 const sequelize = new Sequelize('blogdb', 'root', '2794840873', {
-    host: 'localhost',
+    host: '192.168.110.199',
     dialect: 'mysql',
     pool: {
         max: 5, // 连接池最大连接数
