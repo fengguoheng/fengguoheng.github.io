@@ -6,16 +6,17 @@ export const useLoginStore = defineStore('login', {
         form: {
             username: '',
             password: '',
-            
+
         },
         message: '',
         loginError: false,
-        email:'',
+        email: '',
     }),
     actions: {
         async sqlLogin() {
             try {
-                const response = await axios.post('http://192.168.137.1:3000/api/sqlLogin', {
+
+                const response = await axios.post(`/api/api/sqlLogin`, {
                     username: this.form.username,
                     password: this.form.password
                 });
@@ -23,9 +24,10 @@ export const useLoginStore = defineStore('login', {
                     this.loginError = false;
                     this.message = response.data.message;
                     this.email = response.data.email;
-                    console.log(this.email,3,555555555);
+                    console.log(this.email, 3, 555555555);
                     localStorage.setItem('email', this.email);
-                    console.log(localStorage.getItem('email'),4,6666666666);
+                    console.log(localStorage.getItem('email'), 4, 6666666666);
+                    localStorage.setItem('username', response.data.username);
                     return true; // 表示登录成功
                 } else {
                     this.loginError = true;
@@ -39,7 +41,7 @@ export const useLoginStore = defineStore('login', {
         },
         async mongoLogin() {
             try {
-                const response = await axios.post('http://192.168.110.199:3000/api/mongoLogin', {
+                const response = await axios.post('/api/api/mongoLogin', {
                     username: this.form.username,
                     password: this.form.password
                 });

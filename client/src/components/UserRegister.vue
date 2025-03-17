@@ -56,7 +56,7 @@ const handleRegister = () => {
     }
 
     // 发送注册请求到后端
-    fetch('http://192.168.137.1:3000/api/register', {
+    fetch('/api/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData.value),

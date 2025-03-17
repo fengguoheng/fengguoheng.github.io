@@ -11,7 +11,7 @@ const mysql = require('mysql2/promise');
 //const path = require('path');
 
 const pool = mysql.createPool({
-    host: '192.168.110.199',
+    host: 'localhost',
     user: 'root',
     password: '2794840873',
     database: 'blogdb'
@@ -64,7 +64,7 @@ router.post('/sqlLogin', async (req, res) => {
 
 
             const a = req.session.user;
-            res.json({ success: true, message: 'SQL 数据库登录成功', token, a, email: user.email });
+            res.json({ success: true, message: 'SQL 数据库登录成功', token, a, email: user.email, username: req.body.username });
         } else {
             res.json({ success: false, message: 'SQL 数据库用户名或密码错误' });
         }
@@ -174,30 +174,27 @@ router.post('/register', async (req, res) => {
 });
 router.get('/getBlogs', async (req, res) => {
     try {
-        // 从数据库中查询所有记录
-        const [rows] = await pool.execute('SELECT blogs FROM sqlusers');
-        console.log(1, rows);
-        let allBlogs = [];
-
-        // 遍历查询结果
-        rows.forEach(row => {
-            console.log(2, row);//row是对象
-            console.log(row.blogs, 3);//是数组
-            console.log(Array.isArray(row.blogs))
-            const blogsArray = row.blogs;//说右边不是
-
-
+        const [row1] = await pool.execute('SELECT username, blogs FROM sqlusers;');
+        row1.forEach(item => {
+            const username = item.username;
+            if (item.blogs) { // 检查 blogs 是否为 null 或 undefined
+                item.blogs.forEach(blog => {
+                    blog.username = username; // 添加属性
+                });
+            }
+            delete item.username; // 删除原对象的 username
+        });
+        let allBlogs1 = [];
+        row1.forEach(row => {
+            const blogsArray = row.blogs;
             if (Array.isArray(blogsArray)) {
-                allBlogs = allBlogs.concat(blogsArray);
+                allBlogs1 = allBlogs1.concat(blogsArray);
             }
         });
-
-        // 根据日期对博客进行排序
-        allBlogs.sort((a, b) => {
+        allBlogs1.sort((a, b) => {
             return new Date(b.date) - new Date(a.date);
         });
-
-        res.json(allBlogs);
+        res.json(allBlogs1);
     } catch (error) {
         console.error('查询数据库出错:', error);
         res.status(500).json({ error: '服务器内部错误' });
@@ -205,49 +202,31 @@ router.get('/getBlogs', async (req, res) => {
 });
 // 处理获取用户博客的接口
 router.get('/personBlogs/:email', async (req, res) => {
-    const [rows] = await pool.execute('SELECT blogs FROM sqlUsers WHERE email = ?', [req.params.email]);
-    console.log(1, req.params.email);
-    console.log(4, rows);//rows是数组
-    console.log(5, typeof (rows[0].blogs));//是二维数组
-    console.log(6, rows[0].blogs);//但是但是但是打印出来是[{},{}]
+    const [row1] = await pool.execute('SELECT username, blogs FROM sqlusers WHERE email =?;', [req.params.email]);
+    row1.forEach(item => {
+        const username = item.username;
+        if (Array.isArray(item.blogs)) {
+            item.blogs.forEach(blog => {
+                blog.username = username;
+            });
+        }
+        delete item.username;
+    });
+    let allBlogs1 = [];
+    row1.forEach(row => {
+        const blogsArray = row.blogs;
+        if (Array.isArray(blogsArray)) {
+            allBlogs1 = allBlogs1.concat(blogsArray);
+        }
+    })
     let a = [];
-    if (!rows[0].blogs) {
+    if (!allBlogs1[0]) {
         return res.json({ a });
     }
-    a = rows[0].blogs.sort((a, b) => {
+    a = allBlogs1.sort((a, b) => {
         return new Date(b.date) - new Date(a.date);//.字体是根据对象的字段
     });
-
     res.json({ a });
-    /*
-    const userEmail = req.params.email; // 从路由参数获取 email
-
-
-
-    pool.query('SELECT blogs FROM sqlUsers WHERE email = ?', [userEmail], (err, results) => {
-        if (err) {
-            console.error('执行查询出错:', err);
-            return res.status(500).json({ error: '服务器内部错误' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ error: '用户不存在' });
-        }
-
-        try {
-            const blogsData = results[0].blogs;
-            console.error(Array.isArray(blogsData));
-            //blogsData.sort((a, b) => new Date(b.date) - new Date(a.date));
-            res.json(blogsData); // 返回博客数据
-
-
-        } catch (parseErr) {
-            console.error('解析博客数据出错:', parseErr);
-            res.status(500).json({ error: '博客数据格式异常' });
-        }
-    });
-});
-*/
 });
 router.post('/submitBlogs/:email', async (req, res) => {
     try {
@@ -311,10 +290,6 @@ router.post('/submitBlogs/:email', async (req, res) => {
         if (rows.affectedRows === 0) {
             throw new Error('未找到对应的用户或更新失败');
         }
-
-
-
-
         // 返回成功响应
         res.status(200).json({ message: '文章提交成功', article: newArticle });
     } catch (error) {
@@ -326,65 +301,3 @@ router.post('/submitBlogs/:email', async (req, res) => {
 }),
 
     module.exports = router;
-/*
-// 创建事件发射器实例
-const loginEmitter = new EventEmitter();
-
-// 读取用户数据文件，假设文件格式为每行一个用户，格式为：用户名:密码
-function readUsersFile() {
-  return new Promise((resolve, reject) => {
-      const usersFilePath = path.join(__dirname, 'users.txt');
-      fs.readFile(usersFilePath, 'utf8', (err, data) => {
-          if (err) {
-              reject(err);
-          } else {
-              const users = data.split('\n').map(line => {
-                  const [username, password] = line.split(':');
-                  return { username, password };
-              });
-              resolve(users);
-          }
-      });
-  });
-}
-
-// 监听登录成功事件
-loginEmitter.on('loginSuccess', (username) => {
-  console.log(`${username} 登录成功`);
-});
-
-// 监听登录失败事件
-loginEmitter.on('loginFailure', (username) => {
-  console.log(`${username} 登录失败`);
-});
-
-// 登录路由
-router.post('/login', async (req, res) => {
-  const users = await readUsersFile();
-  const { username, password } = req.body;
-  const user = users.find(u => u.username === username && u.password === password);
-  let result;
-  if (user) {
-      result = { success: true, message: '登录成功' };
-      loginEmitter.emit('loginSuccess', username);
-  } else {
-      result = { success: false, message: '用户名或密码错误' };
-      loginEmitter.emit('loginFailure', username);
-  }
-  res.json(result);
-});
-
-// 动态路由参数：根据用户名获取用户信息
-router.get('/users/:username', async (req, res) => {
-  const users = await readUsersFile();
-  const { username } = req.params;
-  const user = users.find(u => u.username === username);
-  if (user) {
-      res.json(user);
-  } else {
-      res.status(404).json({ message: '用户未找到' });
-  }
-});
-
-module.exports = router;
-*/

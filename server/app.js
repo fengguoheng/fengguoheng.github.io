@@ -59,23 +59,43 @@ const kkgithubOAuth2 = new OAuth.OAuth2(
         }
     }
 );
-//前端通过浏览器的地址栏输入相应的 URL
-// （例如 http://yourdomain.com/auth/github）
-// 或者通过代码中使用 window.location.href 等方式进行页面跳转，都会触发对该路由的 GET 请求
+
 app.get('/auth/github', passport.authenticate('github', {//授权登录界面
     prompt: 'login' 
 }));//第二个参数是中间件
-//处理 GitHub 认证回调的路由。当 GitHub 认证流程完成后，会向这个路由发送回调请求。
-//当接收到回调请求时，会先执行第二个参数passport.authenticate('github', { failureRedirect: '/login' })这个中间件。它会对 GitHub 返回的认证信息进行验证和处理，如果认证失败，就会重定向到/login页面。
-//如果认证成功，才会执行第三个参数，即回调函数(req, res) => { res.redirect('http://192.168.110.199:8080/'); }，将用户重定向到http://192.168.110.199:8080/页面。
-app.get('/auth/github/callback', 
+app.get('/auth/github/callback',
     passport.authenticate('github', { failureRedirect: '/login' }),
-    (req, res) => {
-        res.redirect('http://192.168.110.199:8080/home'); //重新定向到前端首页
+    async (req, res) => {
+        try {
+            console.log('用户信息:', req.user);
+            console.log('GitHub ID:', req.user.id);
+
+            // 示例：获取用户名和 GitHub ID
+            const username = req.user.username;
+            let password = req.user.id.toString().substring(0, 10);
+            if (password.length < 10) {
+                password = password.padEnd(10, '0');
+            }
+
+            // 插入用户信息到数据库
+            const [result] = await pool.execute(
+                'INSERT INTO sqlusers (username, password) VALUES (?, ?)',
+                [username, password]
+            );
+
+            console.log('用户信息插入成功，插入的 ID 为:', result.insertId);
+
+            // 重定向到用户首页
+            res.redirect('http://192.168.110.200:8080/home');
+        } catch (error) {
+            console.error('插入用户信息到数据库时出错:', error);
+            res.status(500).send('服务器内部错误');
+        }
     }
 );
+
 app.get('/', (req, res) => {
-    res.redirect('http://192.168.110.199:8080/'); //重新定向到前端首页
+    res.redirect('http://192.168.110.200:8080/'); //重新定向到前端首页
     
 })
 
@@ -88,14 +108,15 @@ app.use((err, req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 配置 GitHub 登录策略（关键修复：确保 clientID、clientSecret 正确传递）
+
 passport.use(new GitHubStrategy({
     oauth2: kkgithubOAuth2, // 自定义 OAuth2 实例
     clientID: 'Ov23liqyjvZ8blf0Nqmr', // 明确保留 clientID
     clientSecret: '2ac73990a8e357d52370c8c8b0d12a13b1f185be', // 明确保留 clientSecret
-    callbackURL: 'http://192.168.110.199:3000/auth/github/callback'//回调地址
+    callbackURL: 'http://192.168.110.200:3000/auth/github/callback'//回调地址
 }, (accessToken, refreshToken, profile, done) => {//待丰富
-    // 处理 GitHub 用户信息，例如保存到数据库或返回给前端
+    // 处理 GitHub 登录回调逻辑，例如保存用户信息到数据库
+    console.log(3333,profile);
     done(null, profile);
 }));
 
@@ -105,5 +126,5 @@ passport.deserializeUser((user, done) => done(null, user));
 
 const port = 3000;
 app.listen(port, () => {
-    console.log(`Server running at http://192.168.110.199:${port}/`);
+    console.log(`Server running at http://192.168.110.200:${port}/`);
 });

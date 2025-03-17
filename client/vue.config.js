@@ -13,8 +13,11 @@ module.exports = defineConfig({
     devServer: {
         proxy: {
             '/api': {
-                target: 'http://192.168.100.19:3000', // 后端实际地址
-                changeOrigin: true
+                target: 'http://192.168.110.200:3000', // 后端 API 地址，这里直接硬编码
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/api': '' // 去除请求路径中的 /api 前缀
+                }
             }
         }
     }

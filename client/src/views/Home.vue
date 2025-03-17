@@ -2,7 +2,7 @@
     <div class="nav-container">
         <div class="header-section">
             <h1 class="title">博·客·系·统</h1>
-            <span class="designer">欢迎冯国恒</span>
+            <span class="designer">欢迎{{ username }}</span>
         </div>
         <el-menu class="nav-menu" mode="horizontal" :default-active="activeIndex" @select="handleSelect">
             <el-menu-item index="home">首页</el-menu-item>
@@ -16,6 +16,7 @@
             <el-card v-for="blog in sortedBlogs" :key="blog.id" class="blog-card">
                 <template #header>
                     <h3>{{ blog.title }}</h3>
+                    <h4>{{ blog.username }}</h4>
                     <span class="blog-date">{{ new Date(blog.date).toLocaleString('zh-CN', {
                         year: 'numeric',
                         month: '2-digit',
@@ -36,35 +37,26 @@
     <audio id="musicPlayer" src="船长.mp3" controls style="display: none;"></audio>
 
     <!-- 播放音乐按钮 -->
-    <button ref="musicBtnRef"  class="music-btn" @click="playMusic()">播放音乐</button>
-
-
+    <button ref="musicBtnRef" class="music-btn" @click="playMusic()">播放音乐</button>
 </template>
-
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import router from '../router/index.js';
-
 const activeIndex = ref('home');
-
 const handleSelect = (index) => {
     console.log('当前选中：', index);
     if (index === 'exit') {
         // 可在此处添加退出登录等逻辑
     }
 };
-
-const blogs = ref([]);
 const sortedBlogs = ref([]);
 const musicBtnRef = ref(null);
-
+const username = ref('');
 const fetchBlogs = async () => {
     try {
-        const response = await axios.get('http://192.168.110.199:3000/api/getBlogs');
-        blogs.value = response.data;
-        sortedBlogs.value = blogs.value;
+        const response = await axios.get('/api/api/getBlogs');
+        sortedBlogs.value = response.data;
     } catch (error) {
         console.error('获取博客数据失败:', error);
     }
@@ -85,10 +77,9 @@ const playMusic = () => {
         musicBtnRef.value.textContent = "播放音乐"; // 切换回播放文字
     }
 };
-
 onMounted(() => {
-    console.log('localstorage', localStorage.getItem('email'));
     fetchBlogs();
+    username.value = localStorage.getItem('username');
 });
 </script>
 

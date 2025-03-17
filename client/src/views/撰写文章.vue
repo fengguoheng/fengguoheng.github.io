@@ -46,7 +46,7 @@ const submitArticle = async () => {
         if (valid) {
             try {
                 // 替换为实际的接口地址
-                const response = await axios.post(`http://192.168.110.199:3000/api/submitBlogs/${email.value}`, articleForm.value);
+                const response = await axios.post(`/api/api/submitBlogs/${email.value}`, articleForm.value);
                 if (response.status === 200) {
                     ElMessage.success('文章提交成功');
                     articleForm.value = { title: '', content: '' };

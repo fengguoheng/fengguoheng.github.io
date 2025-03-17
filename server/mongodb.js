@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // 连接 MongoDB，配置连接池
-mongoose.connect('mongodb://192.168.110.199:27017/blogdb', {
+mongoose.connect('mongodb://localhost:27017/blogdb', {
     
     maxPoolSize: 5 // 连接池大小
 });

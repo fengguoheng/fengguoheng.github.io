@@ -4,10 +4,12 @@
         <input :class="{ 'error-input': loginStore.loginError }" v-model="loginStore.form.username" placeholder="用户名" />
         <input v-model="loginStore.form.password" placeholder="密码" type="password" />
         <button @click="handleSqlLogin">SQL 登录</button>
+        <!--
         <button @click="handleMongoLogin">MongoDB 登录</button>
         <button @click="fetchLogin">使用 Fetch 登录</button>
         <button @click="ttt">尝试token</button>
         <button @click="accessProtected">尝试session</button>
+        -->
         <button id="githubLoginBtn">使用 GitHub 登录</button>
         <button @click="toRegister">现在去注册</button>
         <p>{{ loginStore.message }}</p>
@@ -130,7 +132,7 @@ onMounted(() => {
     if (githubLoginBtn) { // 增加存在性校验
         githubLoginBtn.addEventListener('click', () => {
             //跳转到你后端服务的 /auth/github 路由
-            window.location.href = 'http://192.168.137.1:3000/auth/github';
+            window.location.href = '/api/auth/github';
         });
     }
 });

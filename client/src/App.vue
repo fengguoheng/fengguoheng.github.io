@@ -1,21 +1,10 @@
 <template>
   <div id="app">
-
-    <!-- 使用 v-if 控制组件显示
-    <Login v-if="isLogin" @login-success="handleLoginSuccess" />
-    <UserInfo v-if="isInfo" @logout="handleLogout" />
-    -->
-
     <router-view></router-view>
   </div>
-
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
-import Login from './components/UserLogin.vue';
-import UserInfo from './components/UserInfo.vue';
-
 // 使用 ref 创建响应式数据
 const isLogin = ref(true);
 const isInfo = ref(false);
@@ -35,21 +24,6 @@ onMounted(() => {
   console.log('App 组件已挂载');
 });
 
-const handleLoginSuccess = () => {
-  isLogin.value = false;
-  isInfo.value = true;
-};
-
-const handleLogout = () => {
-  isLogin.value = true;
-  isInfo.value = false;
-};
-const activeIndex = ref('1'); // 默认激活的菜单项
-
-const handleSelect = (index) => {
-  console.log(`当前选中：${index}`);
-  activeIndex.value = index; // 更新激活状态
-};
 </script>
 
 <style scoped>
