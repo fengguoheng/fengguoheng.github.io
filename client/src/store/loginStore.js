@@ -24,10 +24,11 @@ export const useLoginStore = defineStore('login', {
                     this.loginError = false;
                     this.message = response.data.message;
                     this.email = response.data.email;
-                    console.log(this.email, 3, 555555555);
+                    
                     localStorage.setItem('email', this.email);
-                    console.log(localStorage.getItem('email'), 4, 6666666666);
+                    
                     localStorage.setItem('username', response.data.username);
+                    localStorage.setItem('id', response.data.id);
                     return true; // 表示登录成功
                 } else {
                     this.loginError = true;

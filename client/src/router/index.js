@@ -62,6 +62,11 @@ const routes = [
         name:'write',
         component:()=>import('../views/撰写文章.vue')
     }
+    ,{
+       path:'/third',
+       name:'third',
+       component:()=>import('../views/github登录首页.vue') 
+    }
 ];
 
 const router = createRouter({

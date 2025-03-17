@@ -37,6 +37,7 @@ const rules = ref({
 // 模板引用
 const formRef = ref(null);
 const email=ref('');
+const username=ref('');
 
 
 // 提交文章方法
@@ -46,7 +47,7 @@ const submitArticle = async () => {
         if (valid) {
             try {
                 // 替换为实际的接口地址
-                const response = await axios.post(`/api/api/submitBlogs/${email.value}`, articleForm.value);
+                const response = await axios.post(`/api/api/submitBlogs/${username.value}`, articleForm.value);
                 if (response.status === 200) {
                     ElMessage.success('文章提交成功');
                     articleForm.value = { title: '', content: '' };
@@ -69,14 +70,11 @@ const cancel = () => {
     history.back();
 };
 onMounted(() => {
-    console.log('组件挂载', 2, localStorage.getItem('email'));
-    console.log(222);
+   
 
     email.value = localStorage.getItem('email');
+    username.value = localStorage.getItem('username'); // 获取用户名并赋值给响应式变量
    
-    console.log(333);
-    console.log('email', email.value);
-    console.log('1','email.value');
 });
 </script>
 
