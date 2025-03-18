@@ -1,28 +1,15 @@
 const express = require('express');
 const router = express.Router();
-//const EventEmitter = require('events');
 const sequelize = require('./db');
 const { DataTypes } = require('sequelize');
-const mongoose = require('./mongodb.js');
 const jwt = require('jsonwebtoken');
-const session = require('express-session');
 const mysql = require('mysql2/promise');
-//const fs = require('fs');
-//const path = require('path');
-
 const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: '2794840873',
     database: 'blogdb'
 });
-const UserSchema = new mongoose.Schema({
-    username: String,
-    password: String
-});
-const User = mongoose.model('User', UserSchema);
-
-// 创建 SQL 数据库的用户模型//模型似乎封装了操作数据库的函数
 const SqlUser = sequelize.define('SqlUser', {
     username: {
         type: DataTypes.STRING
@@ -37,34 +24,23 @@ const SqlUser = sequelize.define('SqlUser', {
     }
 
 });
-
-// 同步 SQL 数据库模型（仅在开发时使用，生产环境需谨慎）
 sequelize.sync();//创建对应的表
-
-const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(401).json({ message: '未提供 token' });
-    jwt.verify(token.split(' ')[1], 'your_secret_key', (err, decoded) => {
-        if (err) return res.status(403).json({ message: '无效的 token' });
-        req.user = decoded;
-        next();
-    });
-};
 // 登录路由，尝试从 SQL 数据库验证
 router.post('/sqlLogin', async (req, res) => {
     const { username, password } = req.body;
     try {
         // 从 SQL 数据库中查找用户
         const user = await SqlUser.findOne({ where: { username, password } });
+        const [rows] = await pool.execute('SELECT * FROM sqlusers WHERE username = ?', [username]);
+        req.session.userId = rows[0].id; // 假设表中有 id 字段;
+        req.session.username = rows[0].username;
+        req.session.isLoggedIn = true;  // 标记用户已登录
         if (user) {
             // 生成 JWT
             const token = jwt.sign({ userId: user.id }, 'your_secret_key', { expiresIn: '1h' });
             req.session.user = { username: req.body.username, loggedIn: true };
-
-
-
             const a = req.session.user;
-            res.json({ success: true, message: 'SQL 数据库登录成功', token, a, email: user.email, username: req.body.username, id: user.id });
+            res.json({ success: true, message: 'SQL 数据库登录成功', token, a,username: req.body.username, id: user.id });
         } else {
             res.json({ success: false, message: 'SQL 数据库用户名或密码错误' });
         }
@@ -73,82 +49,20 @@ router.post('/sqlLogin', async (req, res) => {
         res.status(500).json({ error: 'SQL 数据库错误' });
     }
 });
-
-// 示例：一个需要验证 Token 的受保护接口
-router.get('/protected', verifyToken, (req, res) => {
-    res.json({ message: '这是受保护的路由', user: req.user });
-});
-
-// 登录路由，尝试从 MongoDB 验证
-router.post('/mongoLogin', async (req, res) => {
-    const { username, password } = req.body;
-    try {
-        const user = await User.findOne({ username, password });
-        if (user) {
-            res.json({ success: true, message: 'MongoDB 数据库登录成功' });
-        } else {
-            res.json({ success: false, message: 'MongoDB 数据库用户名或密码错误' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: 'MongoDB 数据库错误' });
-    }
-});
-
-// 动态路由参数：根据用户名从 SQL 数据库获取用户信息
-router.get('/sqlUsers/:username', async (req, res) => {
-    const { username } = req.params;
-    try {
-        const user = await SqlUser.findOne({ where: { username } });
-        if (user) {
-            res.json(user);
-        } else {
-            res.status(404).json({ message: 'SQL 数据库用户未找到' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: 'SQL 数据库错误' });
-    }
-});
-
-// 动态路由参数：根据用户名从 MongoDB 数据库获取用户信息
-router.get('/mongoUsers/:username', async (req, res) => {
-    const { username } = req.params;
-    try {
-        const user = await User.findOne({ username });
-        if (user) {
-            res.json(user);
-        } else {
-            res.status(404).json({ message: 'MongoDB 数据库用户未找到' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: 'MongoDB 数据库错误' });
-    }
-});
-router.get('/protecteds', (req, res) => {
-    if (req.session.user && req.session.user.loggedIn) {
-        res.json({ message: '这是受保护的路由', user: req.session.user });
-    } else {
-        console.log(req.session.user);
-        console.log(11112222222222);
-        res.status(401).json({ message: '未登录' });
-    }
-});
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
 router.post('/register', async (req, res) => {
     const { username, password, email } = req.body;
-
     // 基本验证：检查字段是否为空
     if (!username || !password || !email) {
         return res.status(400).json({ success: false, message: '请填写完整信息' });
     }
-
     // 验证邮箱格式
     if (!isValidEmail(email)) {
         return res.status(400).json({ success: false, message: '请输入有效的邮箱地址' });
     }
-
     try {
         // 检查用户名是否已存在
         const existingUser = await SqlUser.findOne({ where: { username } });
@@ -156,7 +70,6 @@ router.post('/register', async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ success: false, message: '该用户名已被使用，请选择其他用户名' });
         }
-
         const existingEmailUser = await SqlUser.findOne({ where: { email } });
         console.log(existingEmailUser);
         if (existingEmailUser) {
@@ -164,8 +77,6 @@ router.post('/register', async (req, res) => {
         }
         await SqlUser.create({ username, password, email });
         // 将用户信息插入数据库
-
-
         res.json({ success: true, message: '注册成功' });
     } catch (error) {
         console.error('注册过程中出现数据库错误:', error);

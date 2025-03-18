@@ -2,7 +2,7 @@
     <div class="nav-container">
         <div class="header-section">
             <h1 class="title">博·客·系·统</h1>
-            <span class="designer">欢迎{{ userInfo.username }}</span>
+            <span  v-if="userInfo" class="designer">欢迎{{userInfo.username}}</span>
         </div>
         <el-menu class="nav-menu" mode="horizontal" :default-active="activeIndex" @select="handleSelect">
             <el-menu-item index="home">首页</el-menu-item>
@@ -42,33 +42,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import router from '../router/index.js';
 
 // 合并重复导入，优化代码结构
 const isLoggedIn = ref(false);
 const userInfo = ref({});
-const activeIndex = ref('personal'); // 设置默认选中项
+const activeIndex = ref('home'); // 设置默认选中项
 const sortedBlogs = ref([]); // 存储排序后的博客数据
-const email = ref('');
 const extractedData = ref([]);
-const username = ref(''); // 存储用户名
+
 
 // 组件挂载时触发
-onMounted(async () => {
-    try {
-        const response = await axios.get('api/check', {
-            withCredentials: true // 携带 cookie 信息
-        });
-        if (response.data.isLoggedIn) {
-            isLoggedIn.value = true;
-            userInfo.value = response.data;
-        }
-    } catch (error) {
-        console.error('验证登录状态出错:', error);
-    }
-
-    email.value = localStorage.getItem('email');
-    fetchUserBlogs();
-});
 
 const handleSelect = (index) => {
     console.log('当前选中：', index);
@@ -82,8 +66,7 @@ const handleSelect = (index) => {
 
 const fetchUserBlogs = async () => {
     try {  
-        // 修正重复的 `api` 路径，假设正确路径是 `api/personBlogs/${email.value}`
-        const response = await axios.get(`api/personBlogs/${email.value}`); 
+        const response = await axios.get(`api/api/personBlogs/${userInfo.value.username}`); 
         sortedBlogs.value = response.data.a;
         extractedData.value = sortedBlogs.value.map((blogItem) => ({
             date: blogItem.date,
@@ -95,6 +78,27 @@ const fetchUserBlogs = async () => {
         console.log('获取博客失败:', error);
     }
 };
+const toWrite = () => {
+    router.push('/write'); // 使用 router.push 进行路由跳转 
+}
+onMounted(async () => {
+    try {
+        const response = await axios.get('api/check', {
+            withCredentials: true // 携带 cookie 信息
+        });
+        if (response.data.isLoggedIn) {
+            isLoggedIn.value = true;
+            userInfo.value = response.data;
+            fetchUserBlogs();
+        }
+    } catch (error) {
+        console.error('验证登录状态出错:', error);
+    } 
+});
+const toPerson = () => {
+    router.push('/person'); // 使用 router.push 进行路由跳转
+};
+
 </script>
 
 <style scoped>

@@ -2,7 +2,7 @@
     <div class="nav-container">
         <div class="header-section">
             <h1 class="title">博·客·系·统</h1>
-            <span class="designer">欢迎{{ username }}</span>
+            <span  v-if="userInfo" class="designer">欢迎{{ userInfo.username }}</span>
         </div>
         <el-menu class="nav-menu" mode="horizontal" :default-active="activeIndex" @select="handleSelect">
             <el-menu-item index="home">首页</el-menu-item>
@@ -53,6 +53,8 @@ const handleSelect = (index) => {
 const sortedBlogs = ref([]);
 const musicBtnRef = ref(null);
 const username = ref('');
+const isLoggedIn = ref(false);
+const userInfo = ref({});
 const fetchBlogs = async () => {
     try {
         const response = await axios.get('/api/api/getBlogs');
@@ -77,9 +79,22 @@ const playMusic = () => {
         musicBtnRef.value.textContent = "播放音乐"; // 切换回播放文字
     }
 };
-onMounted(() => {
+onMounted(async () => {
+    try {
+        
+        const response = await axios.get('api/check', {
+            withCredentials: true // 携带 cookie 信息
+        });
+        if (response.data.isLoggedIn) {
+            isLoggedIn.value = true;
+            userInfo.value = response.data;
+        }
+        console.log('用户名:', userInfo.value.username);
+    } catch (error) {
+        console.error('验证登录状态出错:', error);
+    }
+
     fetchBlogs();
-    username.value = localStorage.getItem('username');
 });
 </script>
 

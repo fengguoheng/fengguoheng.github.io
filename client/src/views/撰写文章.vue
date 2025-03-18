@@ -36,9 +36,9 @@ const rules = ref({
 
 // 模板引用
 const formRef = ref(null);
-const email=ref('');
 const username=ref('');
-
+const userInfo = ref({});
+const isLoggedIn = ref(false);
 
 // 提交文章方法
 const submitArticle = async () => {
@@ -47,7 +47,7 @@ const submitArticle = async () => {
         if (valid) {
             try {
                 // 替换为实际的接口地址
-                const response = await axios.post(`/api/api/submitBlogs/${username.value}`, articleForm.value);
+                const response = await axios.post(`/api/api/submitBlogs/${ userInfo.value.username}`, articleForm.value);
                 if (response.status === 200) {
                     ElMessage.success('文章提交成功');
                     articleForm.value = { title: '', content: '' };
@@ -69,12 +69,23 @@ const cancel = () => {
     articleForm.value = { title: '', content: '' };
     history.back();
 };
-onMounted(() => {
-   
+onMounted(async () => {
+    try { username.value = localStorage.getItem('username'); // 获取用户名并赋值给响应式变量
+        
+        const response = await axios.get('api/check', {
+            withCredentials: true // 携带 cookie 信息
+        });
+        if (response.data.isLoggedIn) {
+            isLoggedIn.value = true;
+            userInfo.value = response.data;
+        }
+    } catch (error) {
+        console.error('验证登录状态出错:', error);
+    }
+  
 
-    email.value = localStorage.getItem('email');
-    username.value = localStorage.getItem('username'); // 获取用户名并赋值给响应式变量
-   
+    
+    
 });
 </script>
 

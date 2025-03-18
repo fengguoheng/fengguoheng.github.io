@@ -2,7 +2,7 @@
     <div class="nav-container">
         <div class="header-section">
             <h1 class="title">博·客·系·统</h1>
-            <span class="designer">欢迎{{ username }}</span>
+            <span class="designer">欢迎{{  userInfo.username }}</span>
         </div>
         <el-menu class="nav-menu" mode="horizontal" :default-active="activeIndex" @select="handleSelect">
             <el-menu-item index="home">首页</el-menu-item>
@@ -38,10 +38,9 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 const activeIndex = ref('personal'); // 设置默认选中项
 const sortedBlogs = ref([]); // 存储排序后的博客数据
-const email = ref('');
-// ✅ 定义响应式变量，用于模板渲染
 const extractedData = ref([]);
-const username = ref(''); // 存储用户名
+const isLoggedIn = ref(false);
+const userInfo = ref({});
 const handleSelect = (index) => {
     console.log('当前选中：', index);
     if(index === 'home'){
@@ -53,7 +52,7 @@ const handleSelect = (index) => {
 };
 const fetchUserBlogs = async () => {
     try {  
-        const response = await axios.get(`api/api/personBlogs/${username.value}`);
+        const response = await axios.get(`api/api/personBlogs/${userInfo.value.username}`);
         sortedBlogs.value = response.data.a;
         extractedData.value = sortedBlogs.value.map((blogItem) => ({
             date: blogItem.date,
@@ -65,11 +64,19 @@ const fetchUserBlogs = async () => {
         console.log('获取博客失败:', error);
     }
 };
-onMounted(() => {
-    email.value = localStorage.getItem('email');
-    username.value = localStorage.getItem('username'); // 获取用户名并赋值给响应式变量
-    fetchUserBlogs();
-    
+onMounted(async () => {
+    try {
+        const response = await axios.get('api/check', {
+            withCredentials: true // 携带 cookie 信息
+        });
+        if (response.data.isLoggedIn) {
+            isLoggedIn.value = true;
+            userInfo.value = response.data;
+            fetchUserBlogs();
+        }
+    } catch (error) {
+        console.error('验证登录状态出错:', error);
+    } 
 });
 </script>
 <style scoped>
