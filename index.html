@@ -23,17 +23,7 @@
 
 <body>
     <div id="app">
-        <!-- 注册表单 -->
-        <div class="register-form" v-if="!isLoggedIn &&!isLoginForm &&!isFinding">
-            <h1>一个简单的项目</h1>
-            <h2>注册</h2>
-            <input v-model="registerUsername" placeholder="Username">
-            <input v-model="registerPassword" type="password" placeholder="Password">
-            <button @click="register">注册</button>
-            <button @click="toggleForm">登录</button>
-            <button @click="toFind">找回密码</button>
-            <button @click="toPractise">十二xue登录入口</button>
-        </div>
+       
         <!-- 登录表单 -->
         <div class="login-form" v-if="!isLoggedIn && isLoginForm &&!isEditing">
             <h2>登录</h2>
