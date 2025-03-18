@@ -23,6 +23,7 @@
                         </svg>
                         使用 GitHub 登录
                     </el-button>
+                    <el-button @click="toHome">游客</el-button>
                 </el-form-item>
             </el-form>
             <p>{{ loginStore.message }}</p>
@@ -53,6 +54,9 @@ const handleGithubLogin = () => {
 
 const toRegister = () => {
     window.location.href = '/register';
+};
+const toHome = () => {
+    window.location.href = '/home';
 };
 </script>
 

@@ -1,5 +1,5 @@
 //路由配置文件
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 
 // 路由懒加载
 const Login = () => import('../components/UserLogin.vue');
@@ -47,25 +47,25 @@ const routes = [
         name: 'UserDetail',
         component: () => import('../views/UserDetail.vue')
     }
-    ,{
+    , {
         path: '/register', // 动态路由
         name: 'register',
-        component: () => import('../components/UserRegister.vue') 
+        component: () => import('../components/UserRegister.vue')
     },
     {
         path: '/person', // 动态路由
         name: 'person',
-        component: () => import('../views/个人主页.vue') 
+        component: () => import('../views/个人主页.vue')
     },
     {
-        path:'/write',
-        name:'write',
-        component:()=>import('../views/撰写文章.vue')
+        path: '/write',
+        name: 'write',
+        component: () => import('../views/撰写文章.vue')
     }
-    ,{
-       path:'/third',
-       name:'third',
-       component:()=>import('../views/github登录首页.vue') 
+    , {
+        path: '/third',
+        name: 'third',
+        component: () => import('../views/github登录首页.vue')
     }
 ];
 
