@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkclient"]=self["webpackChunkclient"]||[]).push([[554],{1554:function(n,e,u){u.r(e),u.d(e,{default:function(){return s}});var r=u(641);function t(n,e){const u=(0,r.g2)("router-view");return(0,r.uX)(),(0,r.CE)("div",null,[e[0]||(e[0]=(0,r.Lk)("h1",null,"用户页面",-1)),(0,r.bF)(u)])}var c=u(6262);const l={},i=(0,c.A)(l,[["render",t]]);var s=i}}]);
+//# sourceMappingURL=554.8a372964.js.map
